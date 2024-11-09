@@ -19,10 +19,11 @@ geo <- st_read(dsn = "input_data/map/delimitacao_seca.shp") |>
     cod_micro = microrregi,
     name_micro = nome_micro
   ) |>
-  ms_simplify(
-    keep = 0.001,
-     keep_shapes = TRUE
-  )
+  # ms_simplify(
+  #   keep = 0.95,
+  #    keep_shapes = TRUE
+  # ) |>
+  st_sf()
 
 saveRDS(
   object = geo,
