@@ -2,31 +2,32 @@
 
 # Packages
 library(sf)
+library(geobr)
 library(rmapshaper)
 library(janitor)
 library(dplyr)
 
 # Import shapefile
-geo <- st_read(dsn = "input_data/map/delimitacao_seca.shp") |>
-  clean_names() |>
-  select(-geocodig_m) |>
-  rename(
-    cod_uf = uf,
-    name_uf = sigla,
-    cod_mun = cod6,
-    name_mun = nome_munic,
-    name_meso = nome_meso,
-    cod_micro = microrregi,
-    name_micro = nome_micro
+geo_old <- st_read(dsn = "input_data/map/delimitacao_seca.shp")
+geo <- read_municipality() |>
+  filter(code_muni %in% geo_old$GEOCODIG_M) |>
+  mutate(
+    cod_mun = as.numeric(substr(code_muni, 0, 6))
   ) |>
-  # ms_simplify(
-  #   keep = 0.95,
-  #    keep_shapes = TRUE
-  # ) |>
+  rename(
+    name_mun = name_muni,
+    name_uf = abbrev_state
+  ) |>
+  select(cod_mun, name_mun, name_uf) |>
+  ms_simplify(
+    keep = 0.90,
+     keep_shapes = TRUE
+  ) |>
+  st_set_crs(4326) |>
   st_sf()
 
 saveRDS(
   object = geo,
   file = "output_data/geo.rds",
-  compress = FALSE
+  compress = TRUE
 )
